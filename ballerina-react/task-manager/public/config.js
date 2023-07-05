@@ -17,10 +17,10 @@
  */
 
 window.config = {
-    clientID: 'CqweInNLmQ1hF4gXEZTQcBRGtw0a',
-    signInRedirectURL: 'http://localhost:3000',
-    signOutRedirectURL: 'http://localhost:3000',
+    clientID: 'FS7lU2n9j7PI3wpzs7CgN97Ibbsa',
+    signInRedirectURL: 'https://9f324a08-0268-410b-bdd4-87083b58db0e.e1-us-east-azure.choreoapps.dev',
+    signOutRedirectURL: 'https://9f324a08-0268-410b-bdd4-87083b58db0e.e1-us-east-azure.choreoapps.dev',
     baseUrl: 'https://api.asgardeo.io/t/mevanprodxghoc',
-    serviceURL: 'http://localhost:8080',
-    scopes: ["openid", "profile", "email", "urn:mevanprodxghoc:taskmanagementservicemana:manage:create_tasks", "urn:mevanprodxghoc:taskmanagementservicemana:manage:view_tasks", "urn:mevanprodxghoc:taskmanagementservicemefa:me:view_tasks"]
+    serviceURL: 'https://792e64d4-c437-4a54-a9ca-527fb91a5d5a-prod.e1-us-east-azure.choreoapis.dev/yvn4/sample-app/sample-9090-5c6/1.0.0',
+    scopes: ["openid", "profile", "email"]
 };
