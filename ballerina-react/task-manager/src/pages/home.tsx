@@ -30,7 +30,7 @@ interface DerivedState {
     authenticateResponse: BasicUserInfo,
     idToken: string[],
     decodedIdTokenHeader: string,
-    decodedIDTokenPayload: Record<string, string | number | boolean>;
+    decodedIDTokenPayload: Record<string, string | number | boolean>
 }
 
 /**

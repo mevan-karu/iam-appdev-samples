@@ -77,7 +77,7 @@ export const MainView: FunctionComponent<MainViewPropsInterface> = (
         derivedResponse
     } = props;
 
-    const { getAccessToken } = useAuthContext();
+    const { getAccessToken, updateConfig, signIn } = useAuthContext();
     const [title, setTitle] = useState<string>("");
     const [description, setDescription] = useState<string>("");
     const [assigedUserId, setAssigedUserId] = useState<string>("");
@@ -94,8 +94,33 @@ export const MainView: FunctionComponent<MainViewPropsInterface> = (
     const [success, setSuccess] = React.useState(false);
     const [failed, setFailed] = React.useState(false);
 
+    const checkTokenForPrivilegeAction = () => {
+
+        return derivedResponse?.decodedIDTokenPayload?.acr === "2fa";
+    }
+
+    const updateAuthorizeEndpoint = (authorizeEndpoint: string) => {
+
+        return updateConfig({
+            endpoints: {
+                authorizationEndpoint: window.config.baseUrl + authorizeEndpoint
+            }
+        });
+    }
+
     const handleClickOpen = () => {
-        setOpen(true);
+        if (!checkTokenForPrivilegeAction()) {
+            console.log('not privileged.');
+            updateAuthorizeEndpoint("/oauth2/authorize?acr_values=2fa")
+                .then(() => { 
+                    handleReSignIn()
+                        .then(() => { 
+                            setOpen(true);
+                        })});
+        } else {
+            updateAuthorizeEndpoint("/oauth2/authorize")
+            setOpen(true);
+        }
     };
 
     const handleClose = () => {
@@ -109,8 +134,13 @@ export const MainView: FunctionComponent<MainViewPropsInterface> = (
 
     const manageEndpoint = window.config.manageServiceBaseUrl;
 
+    const handleReSignIn = () => {
+        window.sessionStorage.removeItem("session_data-instance_0-CqweInNLmQ1hF4gXEZTQcBRGtw0a");
+        return signIn();
+    }
+
     const handleOnSubmit = () => {
-        
+
         async function createTask() {
             const accessToken = await getAccessToken();
             const payload: Task = {
@@ -127,73 +157,73 @@ export const MainView: FunctionComponent<MainViewPropsInterface> = (
 
     return (
         <Box sx={{ width: '100%', typography: 'body1' }}>
-        <TabContext value={value}>
-            <Box sx={{ borderBottom: 1, borderColor: 'divider', display: 'flex' }}>
-            <TabList onChange={handleChange} aria-label="lab API tabs example">
-                <Tab label="Assigned Tasks" value="1" />
-                {isPrivileged && 
-                <Tab label="Created Tasks" value="2" />
-                }
-            </TabList>
-            { isPrivileged &&
-            <Button sx={{marginLeft: 'auto'}} onClick={handleClickOpen}>Create Task</Button>
-            }
-            </Box>
-            <TabPanel value="1"><ListTasks opertation="ListAssignedTasks"/></TabPanel>
-            <TabPanel value="2"><ListTasks opertation="ListCreatedTasks"/></TabPanel>
-        </TabContext>
-        <Dialog open={open} onClose={handleClose}>
-            <DialogTitle>Create a new task</DialogTitle>
-            <DialogContent>
-            <DialogContentText>
-                Create a new task.
-            </DialogContentText>
-            <TextField
-                autoFocus
-                margin="dense"
-                id="name"
-                label="Title"
-                type="text"
-                fullWidth
-                variant="standard"
-                onChange={(e) => setTitle(e.target.value)}
-            />
-            <TextField
-                autoFocus
-                margin="dense"
-                id="name"
-                label="Description"
-                type="text"
-                fullWidth
-                variant="standard"
-                onChange={(e) => setDescription(e.target.value)}
-            />
-            <TextField
-                autoFocus
-                margin="dense"
-                id="name"
-                label="Assigned User"
-                type="text"
-                fullWidth
-                variant="standard"
-                onChange={(e) => setAssigedUserId(e.target.value)}
-            />
-            </DialogContent>
-            <DialogActions>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button onClick={() => handleOnSubmit()}>Create Task</Button>
-            </DialogActions>
-        </Dialog>
-        <Snackbar open={success} autoHideDuration={6000} onClose={resetSnackBars}>
-            <Alert onClose={resetSnackBars} severity="success" sx={{ width: '100%' }}>
-            Task created successfully!
-            </Alert>
-        </Snackbar>
-        <Snackbar open={failed} autoHideDuration={6000} onClose={resetSnackBars}>
-            <Alert onClose={resetSnackBars} severity="error" sx={{ width: '100%' }}>
-                Task creation failed!
-            </Alert>
-        </Snackbar>
-        </Box>  
+            <TabContext value={value}>
+                <Box sx={{ borderBottom: 1, borderColor: 'divider', display: 'flex' }}>
+                    <TabList onChange={handleChange} aria-label="lab API tabs example">
+                        <Tab label="Assigned Tasks" value="1" />
+                        {isPrivileged &&
+                            <Tab label="Created Tasks" value="2" />
+                        }
+                    </TabList>
+                    {isPrivileged &&
+                        <Button sx={{ marginLeft: 'auto' }} onClick={handleClickOpen}>Create Task</Button>
+                    }
+                </Box>
+                <TabPanel value="1"><ListTasks opertation="ListAssignedTasks" /></TabPanel>
+                <TabPanel value="2"><ListTasks opertation="ListCreatedTasks" /></TabPanel>
+            </TabContext>
+            <Dialog open={open} onClose={handleClose}>
+                <DialogTitle>Create a new task</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Create a new task.
+                    </DialogContentText>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="name"
+                        label="Title"
+                        type="text"
+                        fullWidth
+                        variant="standard"
+                        onChange={(e) => setTitle(e.target.value)}
+                    />
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="name"
+                        label="Description"
+                        type="text"
+                        fullWidth
+                        variant="standard"
+                        onChange={(e) => setDescription(e.target.value)}
+                    />
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="name"
+                        label="Assigned User"
+                        type="text"
+                        fullWidth
+                        variant="standard"
+                        onChange={(e) => setAssigedUserId(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose}>Cancel</Button>
+                    <Button onClick={() => handleOnSubmit()}>Create Task</Button>
+                </DialogActions>
+            </Dialog>
+            <Snackbar open={success} autoHideDuration={6000} onClose={resetSnackBars}>
+                <Alert onClose={resetSnackBars} severity="success" sx={{ width: '100%' }}>
+                    Task created successfully!
+                </Alert>
+            </Snackbar>
+            <Snackbar open={failed} autoHideDuration={6000} onClose={resetSnackBars}>
+                <Alert onClose={resetSnackBars} severity="error" sx={{ width: '100%' }}>
+                    Task creation failed!
+                </Alert>
+            </Snackbar>
+        </Box>
     );
 };
