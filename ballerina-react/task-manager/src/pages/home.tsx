@@ -166,14 +166,14 @@ export const HomePage: FunctionComponent = (): ReactElement => {
                                 <img alt="task-logo" src={ TASK_LOGO } className="react-logo-image logo"/>
                             </div>
                             <h4 className={ "spa-app-description" }>
-                                Manage your workplace tasks with Task Manager.
+                                Sample react app for testing choreo deployment.
                             </h4>
                             <div>
                             <Button variant="contained" sx={{marginLeft: 'auto'}} onClick={handleLogin}>Login</Button>
                             </div>
-                            <div>
+                            {/* <div>
                             <Button variant="contained" sx={{marginTop: '30px'}} href="https://accounts.asgardeo.io/t/mevanprodxghoc/accountrecoveryendpoint/register.do?client_id=CqweInNLmQ1hF4gXEZTQcBRGtw0a&sp=Task%20Management%20App_Sandbox">Register</Button>
-                            </div>
+                            </div> */}
                         </div>
                     )
             }

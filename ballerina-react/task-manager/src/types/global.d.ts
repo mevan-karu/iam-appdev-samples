@@ -24,8 +24,7 @@ declare global {
             baseUrl: string;
             signInRedirectURL: string;
             signOutRedirectURL: string;
-            meServiceBaseUrl: string;
-            manageServiceBaseUrl: string;
+            serviceURL: string;
        };
     }
 }

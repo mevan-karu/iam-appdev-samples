@@ -18,11 +18,8 @@
 
 import { BasicUserInfo, useAuthContext } from "@asgardeo/auth-react";
 import React, { FunctionComponent, ReactElement, useState } from "react";
-import { Box, Tab, Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Snackbar, Alert } from "@mui/material";
-import { TabContext, TabList, TabPanel } from "@mui/lab";
-import { postTask } from "../api/manage/create-task";
-import { Task } from "../api/type/task";
-import { ListTasks } from "./ListTasks";
+import { Button } from "@mui/material";
+import { getHelloFromService } from "../api/hello";
 
 /**
  * Decoded ID Token Response component Prop types interface.
@@ -53,15 +50,6 @@ export interface DerivedMainViewPropsInterface {
     decodedIDTokenPayload: Record<string, unknown>;
 }
 
-function isPrivilegedUser(authenticateResponse: BasicUserInfo) {
-
-    if (!authenticateResponse) {
-        return false;
-    }
-    const scopes: string = authenticateResponse.allowedScopes as string;
-    return scopes.includes("urn:mevanprodxghoc:taskmanagementservicemana:manage:create_tasks");
-}
-
 /**
  * Displays the derived Authentication Response from the SDK.
  *
@@ -77,153 +65,29 @@ export const MainView: FunctionComponent<MainViewPropsInterface> = (
         derivedResponse
     } = props;
 
-    const { getAccessToken, updateConfig, signIn } = useAuthContext();
-    const [title, setTitle] = useState<string>("");
-    const [description, setDescription] = useState<string>("");
-    const [assigedUserId, setAssigedUserId] = useState<string>("");
+    const[showHello, setShowHello] = useState<boolean>(false);
+    const[helloMessage, setHelloMessage] = useState<string>("");
+    const { getAccessToken } = useAuthContext();
 
-    const isPrivileged = isPrivilegedUser(derivedResponse?.authenticateResponse);
+    const serviceURL = window.config.serviceURL;
 
-    const [value, setValue] = React.useState('1');
-
-    const handleChange = (event: React.SyntheticEvent, newValue: string) => {
-        setValue(newValue);
-    };
-
-    const [open, setOpen] = React.useState(false);
-    const [success, setSuccess] = React.useState(false);
-    const [failed, setFailed] = React.useState(false);
-
-    const checkTokenForPrivilegeAction = () => {
-
-        return derivedResponse?.decodedIDTokenPayload?.acr === "2fa";
-    }
-
-    const updateAuthorizeEndpoint = (authorizeEndpoint: string) => {
-
-        return updateConfig({
-            endpoints: {
-                authorizationEndpoint: window.config.baseUrl + authorizeEndpoint
-            }
-        });
-    }
-
-    const handleClickOpen = () => {
-        if (!checkTokenForPrivilegeAction()) {
-            console.log('not privileged.');
-            updateAuthorizeEndpoint("/oauth2/authorize?acr_values=2fa")
-                .then(() => { 
-                    handleReSignIn()
-                        .then(() => { 
-                            setOpen(true);
-                        })});
-        } else {
-            updateAuthorizeEndpoint("/oauth2/authorize")
-            setOpen(true);
-        }
-    };
-
-    const handleClose = () => {
-        setOpen(false);
-    };
-
-    const resetSnackBars = () => {
-        setSuccess(false);
-        setFailed(false);
-    }
-
-    const manageEndpoint = window.config.manageServiceBaseUrl;
-
-    const handleReSignIn = () => {
-        window.sessionStorage.removeItem("session_data-instance_0-CqweInNLmQ1hF4gXEZTQcBRGtw0a");
-        return signIn();
-    }
-
-    const handleOnSubmit = () => {
-
-        async function createTask() {
+    const handleSayHello = () => {
+        
+        async function getHelloMessage() {
             const accessToken = await getAccessToken();
-            const payload: Task = {
-                title: title,
-                description: description,
-                assignedUser: assigedUserId
-            };
-            const response = await postTask(manageEndpoint, accessToken, payload);
-            response.status === 201 ? setSuccess(true) : setFailed(true);
+            const response = await getHelloFromService(serviceURL, accessToken);
+            setHelloMessage(response.data.message);
         }
-        createTask();
-        setOpen(false);
+        getHelloMessage();
+        setShowHello(true);
     };
 
     return (
-        <Box sx={{ width: '100%', typography: 'body1' }}>
-            <TabContext value={value}>
-                <Box sx={{ borderBottom: 1, borderColor: 'divider', display: 'flex' }}>
-                    <TabList onChange={handleChange} aria-label="lab API tabs example">
-                        <Tab label="Assigned Tasks" value="1" />
-                        {isPrivileged &&
-                            <Tab label="Created Tasks" value="2" />
-                        }
-                    </TabList>
-                    {isPrivileged &&
-                        <Button sx={{ marginLeft: 'auto' }} onClick={handleClickOpen}>Create Task</Button>
-                    }
-                </Box>
-                <TabPanel value="1"><ListTasks opertation="ListAssignedTasks" /></TabPanel>
-                <TabPanel value="2"><ListTasks opertation="ListCreatedTasks" /></TabPanel>
-            </TabContext>
-            <Dialog open={open} onClose={handleClose}>
-                <DialogTitle>Create a new task</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Create a new task.
-                    </DialogContentText>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        id="name"
-                        label="Title"
-                        type="text"
-                        fullWidth
-                        variant="standard"
-                        onChange={(e) => setTitle(e.target.value)}
-                    />
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        id="name"
-                        label="Description"
-                        type="text"
-                        fullWidth
-                        variant="standard"
-                        onChange={(e) => setDescription(e.target.value)}
-                    />
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        id="name"
-                        label="Assigned User"
-                        type="text"
-                        fullWidth
-                        variant="standard"
-                        onChange={(e) => setAssigedUserId(e.target.value)}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose}>Cancel</Button>
-                    <Button onClick={() => handleOnSubmit()}>Create Task</Button>
-                </DialogActions>
-            </Dialog>
-            <Snackbar open={success} autoHideDuration={6000} onClose={resetSnackBars}>
-                <Alert onClose={resetSnackBars} severity="success" sx={{ width: '100%' }}>
-                    Task created successfully!
-                </Alert>
-            </Snackbar>
-            <Snackbar open={failed} autoHideDuration={6000} onClose={resetSnackBars}>
-                <Alert onClose={resetSnackBars} severity="error" sx={{ width: '100%' }}>
-                    Task creation failed!
-                </Alert>
-            </Snackbar>
-        </Box>
+        <div>
+            <div>
+                <Button variant="contained" sx={{marginTop: '30px', marginBottom: '30px', width: "200px"}} onClick={handleSayHello}>Say Hello!</Button>
+            </div>
+            {showHello &&  <div>{helloMessage}</div>}
+        </div>
     );
 };

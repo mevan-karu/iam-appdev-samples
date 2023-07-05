@@ -29,11 +29,11 @@ const AppContent: FunctionComponent = (): ReactElement => {
     return (
         <ErrorBoundary error={error}>
             <Router>
-            <Routes>
-                <Route path="/" element={ <HomePage /> } />
-                <Route element={ <NotFoundPage /> } />
-            </Routes>
-        </Router>
+                <Routes>
+                    <Route path="/" element={ <HomePage /> } />
+                    <Route element={ <NotFoundPage /> } />
+                </Routes>
+            </Router>
         </ErrorBoundary>
     )
 };
