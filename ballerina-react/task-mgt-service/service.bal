@@ -44,7 +44,7 @@ function init() {
 
 # A service representing a network-accessible API
 # bound to port `9090`.
-service /manage on new http:Listener(9090) {
+service /manage on new http:Listener(config:port) {
 
     resource function post tasks(http:Headers headers, Task task) returns Task|http:BadRequest|error {
         

@@ -16,6 +16,8 @@
 
 import ballerina/os;
 
+public configurable int port = 9090;
+
 public configurable string TOKEN_ISSUER = getFromEnvVariable("TOKEN_ISSUER", "api.asgardeo.io");
 public configurable string JWKS_ENDPOINT = getFromEnvVariable("JWKS_ENDPOINT", "https://api.asgardeo.io/oauth/jwks");
 
